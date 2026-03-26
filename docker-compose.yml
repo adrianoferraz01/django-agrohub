@@ -2,26 +2,18 @@ version: '3.8'
 
 services:
   web:
-    build: .
-    container_name: django-hello-world
-    restart: unless-stopped
-    expose:
-      - "8000"
+    image: ghcr.io/adrianoferraz01/django-agrohub:latest
     networks:
-      - traefik-proxy # Substitua pelo nome da rede externa do Traefik
-    labels:
-      - "traefik.enable=true"
-      # Roteamento HTTP normal (altere meusite.com para o seu domínio)
-      - "traefik.http.routers.django-hello-world.rule=Host(`meusite.com`)"
-      - "traefik.http.routers.django-hello-world.entrypoints=web"
-      
-      # (Opcional) Habilitando HTTPS - Descomente caso use SSL
-      # - "traefik.http.routers.django-hello-world-secure.rule=Host(`meusite.com`)"
-      # - "traefik.http.routers.django-hello-world-secure.entrypoints=websecure"
-      # - "traefik.http.routers.django-hello-world-secure.tls.certresolver=myresolver" # Substitua myresolver
-      
-      # Roteamento de trafego para Gunicorn na porta alvo 8000
-      - "traefik.http.services.django-hello-world.loadbalancer.server.port=8000"
+      - traefik-proxy
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.django-hello-world.rule=Host(`meusite.com`)"
+        - "traefik.http.routers.django-hello-world.entrypoints=web"
+        - "traefik.http.services.django-hello-world.loadbalancer.server.port=8000"
+        - "traefik.docker.network=traefik-proxy"
 
 networks:
   traefik-proxy:
